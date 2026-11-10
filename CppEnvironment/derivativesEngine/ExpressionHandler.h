@@ -8,6 +8,7 @@
 #include "FunctionUnparser.h"
 #include "DifferentiationEngine.h"
 #include "FunctionDataStructure.h"
+#include "Simplifier.h"
 using namespace std;
 
 class Expression {
@@ -25,9 +26,11 @@ public:
         if (!expression) {
             return "Error: No valid expression tree found.";
         }
+        Simplifier simple;
 
         VariableIdentifier var = parser.getConverter(dx);
         unique_ptr<Node> differential = differentiate(var);
+        differential = simple.simplify(differential.get());
 
         return ASTPrinter::unparse(differential.get());
         // return a method that unparse this
