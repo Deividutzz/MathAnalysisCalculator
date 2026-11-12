@@ -38,6 +38,11 @@ public:
             return make_unique <Node>(root->getType(), std::move(simplifiedLeft));
         }
 
+        if (auto assocFolded = foldAssociative(
+            root->getType(),simplifiedLeft, simplifiedRight)) {
+            return simplify(assocFolded.get());
+        }
+
         /// Step 3: Binary operators
         /// If both sides are constant these should immediately be simplified.
         if (simplifiedLeft->getType() == NodeType::CONSTANT
@@ -100,6 +105,57 @@ public:
         return make_unique<Node>(op, std::move(simplifiedLeft), std::move(simplifiedRight));
     }
 private:
+    // Helper method for folding constants across associative chains
+    unique_ptr<Node> foldAssociative(NodeType op,
+    unique_ptr<Node>& left, unique_ptr<Node>& right) {
+        if (op != NodeType::ADD && op != NodeType::MULTIPLY) {
+            return nullptr;
+        }
+
+        /// Lambda helper
+        auto compute = [&](double a, double b) {
+            return (op == NodeType::ADD) ? (a + b) : (a * b);
+        };
+
+        // Case A: Left is an operator of the same type, Right is a constant
+        if (left->getType() == op && right->getType() == NodeType::CONSTANT) {
+            double c2 = right->getValue();
+            Node* innerLeft = left->getLeft();
+            Node* innerRight = right->getRight();
+
+            // Subcase 1: (c1 op x) op c2 -> (c1 op c2) op x
+            if (innerLeft->getType() == NodeType::CONSTANT) {
+                double combined = compute(innerLeft->getValue(), c2);
+                return make_unique<Node>(op,make_unique<Node>(combined),innerRight->clone());
+            }
+            // Subcase 2: (x op c1) op c2  ->  (c1 op c2) op x
+            if (innerRight->getType() == NodeType::CONSTANT) {
+                double combined = compute(innerRight->getValue(), c2);
+                return make_unique<Node>(op, make_unique<Node>(combined), innerLeft->clone());
+            }
+        }
+
+        // Case B: Left is a constant, Right is an op of the same type
+        if (left->getType() == NodeType::CONSTANT && right->getType() == op) {
+            double c1 = left->getValue();
+            Node* innerLeft = right->getLeft();
+            Node* innerRight = right->getRight();
+
+            // Subcase 3: c1 op (c2 op x)  ->  (c1 op c2) op x
+            if (innerLeft->getType() == NodeType::CONSTANT) {
+                double combined = compute(c1, innerLeft->getValue());
+                return make_unique<Node>(op, make_unique<Node>(combined), innerRight->clone());
+            }
+            // Subcase 4: c1 op (x op c2)  ->  (c1 op c2) op x
+            if (innerRight->getType() == NodeType::CONSTANT) {
+                double combined = compute(c1, innerRight->getValue());
+                return make_unique<Node>(op, make_unique<Node>(combined), innerLeft->clone());
+            }
+        }
+
+        return nullptr; // It means the pattern did not match
+    }
+
     // Helper to check if a node is a specific constant value safely
     static bool isConstant(const Node* node, double value) {
         return node && node->getType() == NodeType::CONSTANT && std::abs(node->getValue() - value) < 1e-9;
