@@ -121,7 +121,7 @@ private:
         if (left->getType() == op && right->getType() == NodeType::CONSTANT) {
             double c2 = right->getValue();
             Node* innerLeft = left->getLeft();
-            Node* innerRight = right->getRight();
+            Node* innerRight = left->getRight();
 
             // Subcase 1: (c1 op x) op c2 -> (c1 op c2) op x
             if (innerLeft->getType() == NodeType::CONSTANT) {
