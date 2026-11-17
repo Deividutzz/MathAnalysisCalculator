@@ -47,8 +47,8 @@ public:
         /// If both sides are constant these should immediately be simplified.
         if (simplifiedLeft->getType() == NodeType::CONSTANT
         && simplifiedRight->getType() == NodeType::CONSTANT) {
-            auto ltValue = simplifiedLeft->getValue();
-            auto rtValue = simplifiedRight->getValue();
+            const auto ltValue = simplifiedLeft->getValue();
+            const auto rtValue = simplifiedRight->getValue();
 
             switch (root->getType()) {
                 case NodeType::ADD: return make_unique <Node>(ltValue + rtValue);
