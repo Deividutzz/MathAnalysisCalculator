@@ -28,7 +28,7 @@ public:
         }
         Simplifier simple;
 
-        VariableIdentifier var = parser.getConverter(dx);
+        const VariableIdentifier var = parser.getConverter(dx);
         unique_ptr<Node> differential = differentiate(var);
         differential = simple.simplify(differential.get());
 

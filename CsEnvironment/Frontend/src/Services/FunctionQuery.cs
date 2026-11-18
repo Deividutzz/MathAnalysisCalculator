@@ -8,6 +8,7 @@ public class FunctionQuery
     {
         this.function = function;
         // then we apply the algorithm
+        // current step: the complete algorithm is needed for further c# implem.
     }
     private Function function;
 }

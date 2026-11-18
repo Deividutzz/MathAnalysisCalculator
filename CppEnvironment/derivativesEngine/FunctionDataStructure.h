@@ -3,7 +3,7 @@
 #include <memory>
 using namespace std;
 
-enum class VariableIdentifier { X, Y, Z };
+enum class VariableIdentifier { X, Y, Z, U}; /// let's treat U as lambda for our problem
 
 enum class NodeType {
     CONSTANT,

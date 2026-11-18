@@ -13,7 +13,7 @@ class Parser {
 public:
     Parser(string input) {
         string clearStr = "";
-        for (char c : input) {
+        for (const char c : input) {
             if (!isspace(c)) clearStr += c;
         }
         this->input = clearStr;
@@ -29,7 +29,7 @@ public:
         return std::move(expression);
     }
 
-    VariableIdentifier getConverter(char op) {
+    VariableIdentifier getConverter(const char op) {
         return convertVariable(op);
     }
 private:
@@ -97,7 +97,12 @@ private:
     unique_ptr<Node> parsePrimary() {
         char current = peek();
 
-        if (isalpha(current) && !(current == 'x' || current == 'y' || current == 'z')) {
+        if (current == 'x' || current == 'y' || current == 'z' || current == 'u') {
+            consume(current);
+            return make_unique<Node>(convertVariable(current));
+        }
+
+        if (isalpha(current)) {
             string funcName = "";
             while (isalpha(peek())) {
                 funcName += peek();
@@ -114,11 +119,6 @@ private:
             if (funcName == "log") return make_unique<Node>(NodeType::LOG, std::move(inner));
 
             throw runtime_error("Unknown function: " + funcName);
-        }
-
-        if (current == 'x' || current == 'y' || current == 'z') {
-            consume(current);
-            return make_unique<Node>(convertVariable(current));
         }
 
         if (isdigit(current) || current == '.') {
@@ -175,7 +175,7 @@ private:
                 return NodeType::CONSTANT; // Fallback safety
         }
     }
-    static VariableIdentifier convertVariable(char op) {
+    static VariableIdentifier convertVariable(const char op) {
         switch (op) {
             case 'x':
                 return VariableIdentifier::X;
@@ -183,8 +183,10 @@ private:
                 return VariableIdentifier::Y;
             case 'z':
                 return VariableIdentifier::Z;
+            case 'u':
+                return VariableIdentifier::U;
             default:
-                return VariableIdentifier::X;
+                throw invalid_argument(string("Unknown variable: ") + op);
         }
     }
 };

@@ -29,8 +29,9 @@ public:
                     case VariableIdentifier::X: return "x";
                     case VariableIdentifier::Y: return "y";
                     case VariableIdentifier::Z: return "z";
-                    default: return "unknown_var";
+                    case VariableIdentifier::U: return "u";
                 }
+                throw std::runtime_error("Unknown variable identifier");
 
             case NodeType::ADD: {
                 int pred = getPrecedence(NodeType::ADD);

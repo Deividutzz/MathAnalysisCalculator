@@ -10,7 +10,7 @@ int main()
     string equation = "";
     getline(cin, equation);
     Expression expr(equation);
-    cout << "The partial differential is: " << expr.getDiff('x');
+    cout << "The partial differential is: " << expr.getDiff('u');
     // need later an unparser
     return 0;
 }
